@@ -1,4 +1,4 @@
-import { GetStartedAuthButton } from "@/features/auth/components";
+import { GetStartedButton } from "./get-started-button";
 
 export default function HeroSection() {
   return (
@@ -10,7 +10,7 @@ export default function HeroSection() {
         A platform where videos and structured content come together for a
         seamless learning experience.
       </p>
-      <GetStartedAuthButton/>
+      <GetStartedButton/>
     </section>
   );
 }
