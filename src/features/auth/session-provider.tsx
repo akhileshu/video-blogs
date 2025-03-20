@@ -9,6 +9,8 @@ import { ReactNode, useEffect, useRef } from "react";
 // - On the client, we added a ForceSessionUpdate component to refresh the session after mount.
 // This ensures the session is always up-to-date with our custom fields both server-side and client-side.
 
+// my bad - issue was not passing authOptions for SessionProvider , we dont need manual session update
+
 function ForceSessionUpdate() {
   const { update } = useSession();
   const hasUpdated = useRef(false);
@@ -35,7 +37,7 @@ export default function AuthSessionProvider({
   
   return (
     <SessionProvider session={session}>
-      <ForceSessionUpdate />
+      {/* <ForceSessionUpdate /> */}
       {children}
     </SessionProvider>
   );
