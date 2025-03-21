@@ -1,12 +1,13 @@
+import { AppMessage } from "@/features/message/lib/define-messages";
 import { cn } from "@/lib/utils";
 import { InfoIcon } from "lucide-react";
 
 export function Info({
   className,
-  text,
+  message,
 }: {
   className?: string;
-  text: string;
+  message: AppMessage;
 }) {
   return (
     <div
@@ -16,7 +17,7 @@ export function Info({
       )}
     >
       <InfoIcon size={18} />
-      <span>{text}</span>
+      <span>{message.text}</span>
     </div>
   );
 }

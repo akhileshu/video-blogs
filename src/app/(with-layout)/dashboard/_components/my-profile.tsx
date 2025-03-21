@@ -1,5 +1,6 @@
 import { AppCard } from "@/components/ui/app/card";
 import { getServerUser } from "@/features/auth/lib";
+import { getMessage } from "@/features/message/lib/get-message";
 import { cn } from "@/lib/utils";
 
 export async function MyProfile({className}:{className?:string}){
@@ -8,7 +9,7 @@ export async function MyProfile({className}:{className?:string}){
     return (
       <AppCard
         title="My Profile" className={cn("", className)}
-        info={{ show: !user, text: "Please log in to view your profile." }}
+        info={{ show: !user,  message:getMessage("auth","NOT_LOGGED_IN")}}
       >
         <p>{user?.name}</p>
         <p>{user?.email}</p>
