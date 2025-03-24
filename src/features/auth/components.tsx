@@ -1,8 +1,10 @@
 "use client";
 import { Button } from "@/components/app/button";
+import { AppLink } from "@/components/app/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
-import Link from "next/link";
+
+import { useRouter } from "next/navigation";
 
 export default function Auth() {
   const { data: session, status } = useSession();
@@ -14,8 +16,8 @@ export default function Auth() {
   return (
     <div>
       {session ? (
-        <div className="flex gap-1">
-          <Link href={"/dashboard"}>
+        <div className="flex gap-1 items-center">
+          <AppLink className="after:transition-none after:hidden" href={"/dashboard"}>
             <Image
               alt="user-img"
               src={session.user.image}
@@ -23,12 +25,23 @@ export default function Auth() {
               height={40}
               className="aspect-square rounded-full"
             />
-          </Link>
-          <Button onClick={() => signOut()}>Sign Out</Button>
+          </AppLink>
+          <LogoutButton />
         </div>
       ) : (
         <Button onClick={() => signIn("google")}>Sign In with Google</Button>
       )}
     </div>
   );
+}
+
+function LogoutButton() {
+  const router = useRouter();
+
+  async function handleSignOut() {
+    await signOut({ redirect: false });
+    router.refresh(); // Clear client-side cache and re-render
+  }
+
+  return <Button onClick={handleSignOut}>Sign Out</Button>;
 }

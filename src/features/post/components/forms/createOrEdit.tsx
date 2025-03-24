@@ -36,7 +36,7 @@ export default function CreateOrEditPostForm({ post }: CreateOrEditProps) {
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="id" value={post?.id ?? ""} />
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-2">
         <input
           type="text"
           name="title"
@@ -54,6 +54,7 @@ export default function CreateOrEditPostForm({ post }: CreateOrEditProps) {
             isPending ||
             !content ||
             content === placeholderMDContent ||
+            (content === post?.content && title === post?.title) ||
             !title.trim()
           }
           text={isEdit ? "Update" : "Save"}

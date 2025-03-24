@@ -4,6 +4,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { Dispatch, SetStateAction } from "react";
 import { TOC } from "./generateTOC";
 import ToggleBookmarkForm from "./components/forms/BookmarkButton";
+import { ShareButton } from "@/app/(with-layout)/dashboard/_components/my-bookmarks";
 
 export default function MdEditor({
   content,
@@ -22,9 +23,12 @@ export default function MdEditor({
     <div className="flex">
       <div className="min-w-60">
         <TOC className="p-4" content={content} />
-        {!isEditing && postId && isBookmarked !== undefined ? (
-          <ToggleBookmarkForm isBookmarked={isBookmarked} postId={postId} />
-        ) : null}
+        <div className="flex gap-2">
+          {!isEditing && postId && isBookmarked !== undefined ? (
+            <ToggleBookmarkForm isBookmarked={isBookmarked} postId={postId} />
+          ) : null}
+          <ShareButton slug={""}/>
+        </div>
       </div>
       {isEditing && setContent ? (
         <>
@@ -40,7 +44,8 @@ export default function MdEditor({
       ) : (
         <MDEditor.Markdown
           source={content}
-          style={{ whiteSpace: "pre-wrap", padding: "5px" }}
+          className="rounded-md p-3 pl-6"
+          style={{ whiteSpace: "pre-wrap"}}
         />
       )}
     </div>

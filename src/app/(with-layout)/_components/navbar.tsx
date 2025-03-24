@@ -1,27 +1,27 @@
 "use client";
 
 import Auth from "@/features/auth/components";
-import Link from "next/link";
+
 import { useRouter } from "next/navigation";
 import { Search } from "../posts/_components/search";
 import { getInternalHref } from "@/lib/getInternalHref";
+import { AppLink } from "@/components/app/link";
 
 export default function Navbar() {
-const router=useRouter()
+  const router = useRouter();
   return (
-    <nav className="w-full p-2 shadow flex justify-between items-center">
+    <nav className="w-full p-1 flex justify-between items-center border-b">
       <h1
         onClick={() => router.push("/")}
         className="text-xl cursor-pointer font-bold"
       >
         MyApp
       </h1>
-      <Link
-        className="border-2 rounded-sm px-4 py-2 border-blue-600 text-blue-600"
+      <AppLink
         href={getInternalHref("post", "create")}
       >
         Create Post
-      </Link>
+      </AppLink>
       <Search />
       <Auth />
     </nav>

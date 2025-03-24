@@ -9,7 +9,7 @@ export async function MyProfile({ className }: { className?: string }) {
   return (
     <AppCard
       title="My Profile"
-      className={cn("", className)}
+      className={cn("border-0", className)}
       info={{ show: !user, message: getMessage("auth", "NOT_LOGGED_IN") }}
     >
       <p>{user?.name}</p>

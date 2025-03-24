@@ -1,7 +1,8 @@
 import React, { ComponentPropsWithoutRef } from "react";
-import Link from "next/link";
+
 import { highlight } from "sugar-high";
 import Image, { ImageProps } from "next/image";
+import { AppLink } from "@/components/app/link";
 
 type HeadingProps = ComponentPropsWithoutRef<"h1">;
 type ParagraphProps = ComponentPropsWithoutRef<"p">;
@@ -54,9 +55,9 @@ const components = {
       "text-blue-500 hover:text-blue-700 dark:text-gray-400 hover:dark:text-gray-300 dark:underline dark:underline-offset-2 dark:decoration-gray-800";
     if (href?.startsWith("/")) {
       return (
-        <Link href={href} className={className} {...props}>
+        <AppLink href={href} className={className} {...props}>
           {children}
-        </Link>
+        </AppLink>
       );
     }
     if (href?.startsWith("#")) {
@@ -79,7 +80,7 @@ const components = {
     );
   },
   code: ({ children, ...props }: ComponentPropsWithoutRef<"code">) => {
-    if(!children)return
+    if (!children) return;
     const codeHTML = highlight(children as string);
     return (
       <pre className="bg-gray-100 dark:bg-zinc-800 p-4 rounded-md overflow-x-auto">

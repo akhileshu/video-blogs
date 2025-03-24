@@ -1,4 +1,5 @@
 "use server";
+import { getServerUser } from "@/features/auth/lib";
 import { prisma } from "@/features/db/prisma";
 import { getMessage } from "@/features/message/lib/get-message";
 import { revalidatePath } from "next/cache";
@@ -8,8 +9,7 @@ import {
   postUpdateSchema,
   toggleBookmarkSchema,
 } from "../zod";
-import { generateSlug, NOT_LOGGED_IN_RESPONSE, parseFormData } from "./lib";
-import { getServerUser } from "@/features/auth/lib";
+import { generateSlug, parseFormData } from "./lib";
 
 export async function getPosts(query?: string) {
   return await prisma.post.findMany({
@@ -28,7 +28,7 @@ export async function getPosts(query?: string) {
 
 export async function getLoggedInUsersPosts() {
   const user = await getServerUser();
-  if (!user) return { ...NOT_LOGGED_IN_RESPONSE };
+  if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
   const posts = await prisma.post.findMany({
     where: { authorId: user.id },
     orderBy: { createdAt: "desc" },
@@ -38,7 +38,10 @@ export async function getLoggedInUsersPosts() {
 
 export async function getPostBySlug(slug: string) {
   try {
-    const post = await prisma.post.findUnique({ where: { slug } });
+    const post = await prisma.post.findUnique({
+      where: { slug },
+      include: { author: true },
+    });
     if (!post) return { message: getMessage("post", "NOT_FOUND") };
     return { data: post };
   } catch (error) {
@@ -50,7 +53,7 @@ export async function getPostBySlug(slug: string) {
 export async function createPost(_: unknown, formData: FormData) {
   try {
     const user = await getServerUser();
-    if (!user) return { ...NOT_LOGGED_IN_RESPONSE };
+    if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
     const authorId = user.id;
     const { data, fieldErrors } = parseFormData(formData, postCreateSchema);
     if (fieldErrors) return { fieldErrors };
@@ -71,7 +74,7 @@ export async function createPost(_: unknown, formData: FormData) {
 export async function updatePost(_: unknown, formData: FormData) {
   try {
     const user = await getServerUser();
-    if (!user) return { ...NOT_LOGGED_IN_RESPONSE };
+    if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
     const authorId = user.id;
     const { data, fieldErrors } = parseFormData(formData, postUpdateSchema);
     if (fieldErrors) return { fieldErrors };
@@ -91,7 +94,7 @@ export async function updatePost(_: unknown, formData: FormData) {
 export async function deletePost(_: unknown, formData: FormData) {
   try {
     const user = await getServerUser();
-    if (!user) return { ...NOT_LOGGED_IN_RESPONSE };
+    if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
     const { data, fieldErrors } = parseFormData(formData, postDeleteSchema);
     if (fieldErrors) return { fieldErrors };
     const { id } = data;
@@ -107,7 +110,7 @@ export async function deletePost(_: unknown, formData: FormData) {
 export const toggleBookmark = async (_: unknown, formData: FormData) => {
   try {
     const user = await getServerUser();
-    if (!user) return { ...NOT_LOGGED_IN_RESPONSE };
+    if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
     const { data, fieldErrors } = parseFormData(formData, toggleBookmarkSchema);
     if (fieldErrors) return { fieldErrors };
     const { postId } = data;
@@ -149,7 +152,7 @@ export const toggleBookmark = async (_: unknown, formData: FormData) => {
 export const getBookmarkedPosts = async () => {
   try {
     const user = await getServerUser();
-    if (!user) return { ...NOT_LOGGED_IN_RESPONSE };
+    if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
     const bookmarkedPosts = await prisma.bookmark.findMany({
       where: { userId: user.id, isBookmarked: true },
       include: { post: true },
@@ -163,7 +166,7 @@ export const getBookmarkedPosts = async () => {
 
 export const isPostBookmarked = async (postId: number) => {
   const user = await getServerUser();
-  if (!user) return { ...NOT_LOGGED_IN_RESPONSE };
+  if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
   const existing = await prisma.bookmark.findUnique({
     where: { userId_postId: { userId: user.id, postId } },
   });

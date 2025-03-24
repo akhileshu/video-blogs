@@ -4,13 +4,12 @@ import { MyProfile } from "./_components/my-profile";
 import MyBookmarks from "./_components/my-bookmarks";
 
 export default async function Page() {
-  const bookmarkedPostsResult= await getBookmarkedPosts()
+  const bookmarkedPostsResult = await getBookmarkedPosts();
   return (
-    <main>
+    <main className="">
       <MyProfile />
       <MyPosts />
       <MyBookmarks bookmarkedPostsResult={bookmarkedPostsResult} />
     </main>
   );
 }
-

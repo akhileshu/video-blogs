@@ -2,42 +2,39 @@ import { cn } from "@/lib/utils";
 import { ButtonHTMLAttributes, ReactNode } from "react";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "danger";
   size?: "sm" | "md" | "lg";
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
+  fullWidth?: boolean;
 };
 
 export function Button({
-  variant = "primary",
-  size = "md",
+  size = "sm",
   leftIcon,
   rightIcon,
   className,
+  fullWidth,
   children,
   ...props
 }: ButtonProps) {
   return (
     <button
       className={cn(
-        "flex items-center justify-center rounded-md font-medium transition-all",
+        "border cursor-pointer bg-white relative inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-[#F5F5F5] hover:text-cyan-500",
         {
-          "bg-blue-600 text-white hover:bg-blue-700": variant === "primary",
-          "bg-gray-600 text-white hover:bg-gray-700": variant === "secondary",
-          "bg-red-600 text-white hover:bg-red-700": variant === "danger",
+          "h-8 px-2 text-sm": size === "sm",
+          "h-9 px-3 text-base": size === "md",
+          "h-11 px-4 text-lg": size === "lg",
         },
-        {
-          "px-3 py-1 text-sm": size === "sm",
-          "px-4 py-2 text-base": size === "md",
-          "px-5 py-3 text-lg": size === "lg",
-        },
+        fullWidth && "w-full",
         className
       )}
       {...props}
     >
-      {leftIcon && <span>{leftIcon}</span>}
-      {children}
-      {rightIcon && <span>{rightIcon}</span>}
+      {leftIcon && <span className="flex-shrink-0">{leftIcon}</span>}
+      <span>{children}</span>
+      {rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
     </button>
   );
 }
+

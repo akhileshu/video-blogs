@@ -1,5 +1,5 @@
+import { AppLink } from "@/components/app/link";
 import { getPosts } from "@/features/post/actions/postActions";
-import Link from "next/link";
 
 export default async function Page({
   searchParams,
@@ -11,18 +11,21 @@ export default async function Page({
 
   return (
     <main className="p-4">
-      <h1 className="text-xl mb-4">Results for <span className="font-bold">{query}</span></h1>
+      <h1 className="text-xl mb-4">
+        Results for <span className="font-bold">{query}</span>
+      </h1>
       {posts.length === 0 ? (
         <p>No posts found.</p>
       ) : (
         <ul className="space-y-3">
           {posts.map((post) => (
             <li key={post.id} className="border p-4 rounded-md">
-              <Link href={`/posts/${post.slug}`}>
-                <h2 className="font-semibold text-lg hover:underline">
-                  {post.title}
-                </h2>
-              </Link>
+              <AppLink
+                className="after:transition-none"
+                href={`/posts/${post.slug}`}
+              >
+                <h2 className="font-semibold text-lg">{post.title}</h2>
+              </AppLink>
               <p className="text-sm text-gray-600 mb-1">
                 by {post.author.name ?? "Unknown"} on{" "}
                 {post.createdAt.toLocaleDateString()}
