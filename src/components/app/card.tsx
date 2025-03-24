@@ -10,7 +10,7 @@ export function AppCard({
   info,
 }: {
   title: string;
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   info?: { show: boolean; message: AppMessage };
 }) {

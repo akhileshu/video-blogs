@@ -1,11 +1,10 @@
 @import "tailwindcss";
+@import "tailwindcss/utilities";
 
 @plugin "tailwindcss-animate";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
-
-
-
 
 @theme inline {
   --color-background: var(--background);
@@ -45,6 +44,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-akhilesh-twitter-blue: #1da1f2;
 }
 
 :root {
@@ -122,5 +122,8 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  button:disabled {
+    @apply opacity-50 cursor-not-allowed pointer-events-none;
   }
 }
