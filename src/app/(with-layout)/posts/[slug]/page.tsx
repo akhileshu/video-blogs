@@ -1,10 +1,8 @@
 import { AppCard } from "@/components/app/card";
-import { Info } from "@/components/app/info";
-import {
-  getPostBySlug,
-  isPostBookmarked,
-} from "@/features/post/actions/postActions";
-import MdEditor from "@/features/post/md-editor";
+import { renderStatusMessage } from "@/components/app/renderStatusMessage";
+import { getPostBySlug } from "@/features/post/actions/postActions";
+import MdEditor from "@/features/post/components/md-editor";
+import { formatDate } from "@/lib/utils";
 
 export default async function Page({
   params,
@@ -12,28 +10,24 @@ export default async function Page({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const result = await getPostBySlug(slug);
-  const { data: post, message } = result || {};
-  if (message && !post) return <Info message={message} />;
+  const postResult = await getPostBySlug(slug);
+  const statusMessage = renderStatusMessage(postResult, "Post Unavailable");
+  if (statusMessage || !postResult.ok) return statusMessage;
+  const { data: post } = postResult;
 
-  const isBookmarked = await isPostBookmarked(post.id);
   return (
     <AppCard title={post.title}>
       <div className="mb-4 text-sm text-muted-foreground flex gap-2">
         <p>
           By <strong>{post.author.name}</strong>
         </p>
-        <p>Created on: {new Date(post.createdAt).toLocaleDateString()}</p>
+        <p>Created on: {formatDate(post.createdAt)}</p>
         {post.updatedAt !== post.createdAt && (
-          <p>Updated on: {new Date(post.updatedAt).toLocaleDateString()}</p>
+          <p>Updated on: {formatDate(post.updatedAt)}</p>
         )}
       </div>
 
-      <MdEditor
-        isBookmarked={isBookmarked.bookmarked}
-        postId={post.id}
-        content={post.content}
-      />
+      <MdEditor postId={post.id} content={post.content} />
     </AppCard>
   );
 }

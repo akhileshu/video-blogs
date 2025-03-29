@@ -1,42 +1,78 @@
 "use client";
+import { Button, ButtonState } from "@/components/app/button";
 import { useActionState, useEffect, useState } from "react";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa";
-import { toggleBookmark } from "../../actions/postActions";
-import { toast } from "sonner";
-import { Button } from "@/components/app/button";
-import { useRouter } from "next/navigation";
+import { isPostBookmarked, toggleBookmark } from "../../actions/postActions";
+import { useHandleFormState } from "@/lib/useHandleFormState";
+import { initialState } from "@/lib/handleAction";
+import { handleToastMessage } from "@/components/app/toast";
 
-export default function ToggleBookmarkForm({
-  postId,
-  isBookmarked,
-}: {
-  postId: number;
-  isBookmarked: boolean;
-}) {
-  const [localBookmarked, setLocalBookmarked] = useState(isBookmarked);
-  const [state, formAction, isPending] = useActionState(
+export default function ToggleBookmarkForm({ postId }: { postId: number }) {
+  const [toggleBookmarkState, formAction, isPending] = useActionState(
     toggleBookmark,
-    undefined
+    initialState
   );
-  const { bookmarked, fieldErrors, message } = state ?? {};
-  const router = useRouter();
+
+  const [isPostBookmarkedResult, setIsPostBookmarkedResult] =
+    useState<
+      Awaited<ReturnType<typeof isPostBookmarked> | typeof initialState>
+    >(initialState);
+
+  const isToggleClicked = toggleBookmarkState !== initialState;
+  const isBookmarked = !isToggleClicked
+    ? isPostBookmarkedResult?.data?.isBookmarked
+    : toggleBookmarkState?.data?.isBookmarked;
+    
+  const getButtonState = (): ButtonState => {
+    const { data, message, ok } = isPostBookmarkedResult;
+
+    if (!ok) {
+      return {
+        disabled: true,
+        tooltip: message.text,
+      };
+    }
+    if (ok && !isToggleClicked) {
+      return {
+        disabled: isPending,
+        tooltip:
+          typeof data?.isBookmarked !== "boolean"
+            ? "Something went wrong"
+            : data.isBookmarked
+            ? "Remove from Bookmark"
+            : "Add Post to Bookmark",
+      };
+    } else
+      return {
+        disabled: isPending,
+        tooltip:
+          typeof toggleBookmarkState.data?.isBookmarked !== "boolean"
+            ? toggleBookmarkState.message.text
+            : toggleBookmarkState.data.isBookmarked
+            ? "Remove from Bookmark"
+            : "Add Post to Bookmark",
+      };
+  };
+
+  useHandleFormState({
+    state: toggleBookmarkState,
+    revalidatePath: "/dashboard",
+  });
+
   useEffect(() => {
-    if (message?.type === "success" && bookmarked !== undefined) {
-      toast.success(message.text);
-      // used router.refresh() instead of revalidatePath()
-      // to show toast on client before triggering revalidation
-      router.refresh();
-      setLocalBookmarked(bookmarked);
-    } else if (message?.type === "error") toast.error(message.text);
-    else if (message?.type === "warning") toast.warning(message.text);
-    else if (fieldErrors) toast.error(fieldErrors.postId);
-  }, [bookmarked, fieldErrors, message, router]);
+    async function fetchBookmarkStatus() {
+      const result = await isPostBookmarked(postId);
+      setIsPostBookmarkedResult(result);
+      if (!result.ok) handleToastMessage(result.message);
+    }
+    fetchBookmarkStatus();
+  }, [postId]);
 
   return (
     <form action={formAction}>
       <input type="hidden" name="postId" value={postId} />
-      <Button disabled={isPending} type="submit">
-        {localBookmarked ? (
+      <Button {...getButtonState()} type="submit">
+        {isBookmarked ? (
           <FaBookmark className="text-yellow-500" />
         ) : (
           <FaRegBookmark />

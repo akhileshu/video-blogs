@@ -1,22 +1,27 @@
 "use client";
-import { useActionState, useEffect } from "react";
-import { deletePost } from "../../actions/postActions";
 import { Button } from "@/components/app/button";
-import { toast } from "sonner";
+import { useHandleFormState } from "@/lib/useHandleFormState";
+import { useActionState } from "react";
+import { deletePost } from "../../actions/postActions";
+import { confirmBeforeSubmit } from "@/components/app/SubmitButton";
+import { initialState } from "@/lib/handleAction";
 
 export default function DeletePostForm({ postId }: { postId: number }) {
-  const [state, formAction, isPending] = useActionState(deletePost, undefined);
-  const { fieldErrors, message } = state ?? {};
+  const [state, formAction, isPending] = useActionState(
+    deletePost,
+    initialState
+  );
+  const handleConfirm = confirmBeforeSubmit(
+    "Are you sure you want to delete this post?"
+  );
 
-  useEffect(() => {
-    if (message?.type === "success") {
-      toast.success(message.text);
-    } else if (message?.type === "error") toast.error(message.text);
-    else if (message?.type === "warning") toast.warning(message.text);
-    else if (fieldErrors) toast.error(fieldErrors.id);
-  }, [fieldErrors, message]);
+  useHandleFormState({
+    state,
+    revalidatePath: "/dashboard",
+  });
+
   return (
-    <form action={formAction}>
+    <form onSubmit={handleConfirm} action={formAction}>
       <input type="hidden" name="id" value={postId} />
       <Button type="submit" disabled={isPending} className="text-red-500">
         Delete

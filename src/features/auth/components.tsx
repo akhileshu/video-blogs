@@ -7,17 +7,12 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function Auth() {
-  const { data: session, status } = useSession();
-  if (status === "loading") return <p>Loading...</p>;
-  if (status === "authenticated") {
-    console.log(session?.user?.id ?? "No ID");
-  }
-
+  const { data: session } = useSession();
   return (
     <div>
       {session ? (
         <div className="flex gap-1 items-center">
-          <AppLink className="after:transition-none after:hidden" href={"/dashboard"}>
+          <AppLink disableTransition disableUnderline href={"/dashboard"}>
             <Image
               alt="user-img"
               src={session.user.image}
@@ -35,7 +30,7 @@ export default function Auth() {
   );
 }
 
-function LogoutButton() {
+function LogoutButton() { 
   const router = useRouter();
 
   async function handleSignOut() {

@@ -18,3 +18,7 @@ export const postDeleteSchema = z.object({
 export const toggleBookmarkSchema = z.object({
   postId: z.coerce.number(),
 });
+
+export const postQuerySchema = z.object({
+  query: z.string().min(2, "Query must be at least 2 characters"),
+});

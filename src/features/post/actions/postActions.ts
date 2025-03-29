@@ -6,170 +6,212 @@ import { revalidatePath } from "next/cache";
 import {
   postCreateSchema,
   postDeleteSchema,
+  postQuerySchema,
   postUpdateSchema,
   toggleBookmarkSchema,
-} from "../zod";
-import { generateSlug, parseFormData } from "./lib";
+} from "./zod";
+import { generateSlug } from "./lib";
+import {
+  fetchSuccess,
+  fetchError,
+  handleFetchAction,
+  mutateSuccess,
+  mutateError,
+  handleMutateAction,
+  FetchResponse,
+  MutateResponse,
+  fetchErrorNotLoggedIn,
+  mutateErrorNotLoggedIn,
+  parseFormData,
+} from "../../../lib/handleAction";
+import { Post, Prisma } from "@prisma/client";
 
-export async function getPosts(query?: string) {
-  return await prisma.post.findMany({
-    where: query
-      ? {
-          OR: [
-            { title: { contains: query, mode: "insensitive" } },
-            { content: { contains: query, mode: "insensitive" } },
-          ],
-        }
-      : undefined,
-    orderBy: { createdAt: "desc" },
-    include: { author: true },
+type PostWithAuthor = Prisma.PostGetPayload<{
+  include: { author: true };
+}>;
+export async function getPosts(
+  query?: string
+): Promise<FetchResponse<PostWithAuthor[]>> {
+  return handleFetchAction(async () => {
+    const { data, error } = postQuerySchema.safeParse({ query });
+    // todo : improve appmessages , maybe we need to include fielderrors in fetchresponse as well
+    if (error) return fetchError(getMessage("post", "NOT_FOUND"));
+    const posts = await prisma.post.findMany({
+      where: data.query
+        ? {
+            OR: [
+              { title: { contains: data.query, mode: "insensitive" } },
+              { content: { contains: data.query, mode: "insensitive" } },
+            ],
+          }
+        : undefined,
+      orderBy: { createdAt: "desc" },
+      include: { author: true },
+      take: 50,
+    });
+    return fetchSuccess(posts);
   });
 }
 
-export async function getLoggedInUsersPosts() {
-  const user = await getServerUser();
-  if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
-  const posts = await prisma.post.findMany({
-    where: { authorId: user.id },
-    orderBy: { createdAt: "desc" },
+export async function getLoggedInUsersPosts(): Promise<FetchResponse<Post[]>> {
+  return handleFetchAction(async () => {
+    const user = await getServerUser();
+    if (!user) return fetchErrorNotLoggedIn;
+    const posts = await prisma.post.findMany({
+      where: { authorId: user.id },
+      orderBy: { createdAt: "desc" },
+    });
+    return fetchSuccess(posts);
   });
-  return { data: posts };
 }
 
-export async function getPostBySlug(slug: string) {
-  try {
+export async function getPostBySlug(
+  slug: string
+): Promise<FetchResponse<PostWithAuthor>> {
+  return handleFetchAction(async () => {
     const post = await prisma.post.findUnique({
       where: { slug },
       include: { author: true },
     });
-    if (!post) return { message: getMessage("post", "NOT_FOUND") };
-    return { data: post };
-  } catch (error) {
-    console.error("Create post error:", error);
-    return { message: getMessage("post", "NOT_FOUND") };
-  }
+    if (!post) return fetchError(getMessage("post", "NOT_FOUND"));
+    return fetchSuccess(post);
+  });
 }
 
-export async function createPost(_: unknown, formData: FormData) {
-  try {
+export async function createPost(
+  _: unknown,
+  formData: FormData
+): Promise<MutateResponse<undefined, typeof postCreateSchema>> {
+  return handleMutateAction(async () => {
     const user = await getServerUser();
-    if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
-    const authorId = user.id;
+    if (!user) return mutateErrorNotLoggedIn;
     const { data, fieldErrors } = parseFormData(formData, postCreateSchema);
-    if (fieldErrors) return { fieldErrors };
-
-    const { content, title } = data;
-
+    if (fieldErrors)
+      return mutateError(getMessage("post", "CREATE_ERROR"), fieldErrors);
     await prisma.post.create({
-      data: { title, slug: generateSlug(title), content, authorId },
+      data: {
+        title: data.title,
+        slug: generateSlug(data.title),
+        content: data.content,
+        authorId: user.id,
+      },
     });
-
-    return { message: getMessage("post", "CREATE_SUCCESS") };
-  } catch (err) {
-    console.error("Create post error:", err);
-    return { message: getMessage("post", "CREATE_ERROR") };
-  }
+    return mutateSuccess(getMessage("post", "CREATE_SUCCESS"));
+  });
 }
 
-export async function updatePost(_: unknown, formData: FormData) {
-  try {
+export async function updatePost(
+  _: unknown,
+  formData: FormData
+): Promise<MutateResponse<undefined, typeof postUpdateSchema>> {
+  return handleMutateAction(async () => {
     const user = await getServerUser();
-    if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
-    const authorId = user.id;
+    if (!user) return mutateErrorNotLoggedIn;
     const { data, fieldErrors } = parseFormData(formData, postUpdateSchema);
-    if (fieldErrors) return { fieldErrors };
-    const { content, id, title } = data;
-
+    if (fieldErrors)
+      return mutateError(getMessage("post", "UPDATE_ERROR"), fieldErrors);
     await prisma.post.update({
-      where: { id, authorId },
-      data: { title, content, slug: generateSlug(title) },
+      where: { id: data.id, authorId: user.id },
+      data: {
+        title: data.title,
+        content: data.content,
+        slug: generateSlug(data.title),
+      },
     });
-    return { message: getMessage("post", "UPDATE_SUCCESS") };
-  } catch (error) {
-    console.error("Create post error:", error);
-    return { message: getMessage("post", "UPDATE_ERROR") };
-  }
+    return mutateSuccess(getMessage("post", "UPDATE_SUCCESS"));
+  });
 }
 
-export async function deletePost(_: unknown, formData: FormData) {
-  try {
+export async function deletePost(
+  _: unknown,
+  formData: FormData
+): Promise<MutateResponse<undefined, typeof postDeleteSchema>> {
+  return handleMutateAction(async () => {
     const user = await getServerUser();
-    if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
+    if (!user) return mutateErrorNotLoggedIn;
     const { data, fieldErrors } = parseFormData(formData, postDeleteSchema);
-    if (fieldErrors) return { fieldErrors };
-    const { id } = data;
-    await prisma.post.delete({ where: { id, authorId: user.id } });
-    revalidatePath("/dashboard");
-    return { message: getMessage("post", "DELETE_SUCCESS") };
-  } catch (error) {
-    console.error("Toggle bookmark error:", error);
-    return { message: getMessage("post", "DELETE_ERROR") };
-  }
+    if (fieldErrors)
+      return mutateError(getMessage("post", "DELETE_ERROR"), fieldErrors);
+    await prisma.post.delete({ where: { id: data.id, authorId: user.id } });
+    return mutateSuccess(getMessage("post", "DELETE_SUCCESS"));
+  });
 }
 
-export const toggleBookmark = async (_: unknown, formData: FormData) => {
-  try {
+export async function toggleBookmark(
+  _: unknown,
+  formData: FormData
+): Promise<
+  MutateResponse<
+    {
+      isBookmarked: boolean;
+    },
+    typeof toggleBookmarkSchema
+  >
+> {
+  return handleMutateAction(async () => {
     const user = await getServerUser();
-    if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
+    if (!user) return mutateErrorNotLoggedIn;
     const { data, fieldErrors } = parseFormData(formData, toggleBookmarkSchema);
-    if (fieldErrors) return { fieldErrors };
+    if (fieldErrors)
+      return mutateError(getMessage("bookmark", "REMOVE_ERROR"), fieldErrors);
     const { postId } = data;
-
-    const userId = user.id;
     const existing = await prisma.bookmark.findUnique({
-      where: { userId_postId: { userId, postId } },
+      where: { userId_postId: { userId: user.id, postId } },
     });
-
     if (existing) {
       const updated = await prisma.bookmark.update({
         where: { id: existing.id },
         data: { isBookmarked: !existing.isBookmarked },
       });
-      // used router.refresh() instead of revalidatePath()
-      // to show toast on client before triggering revalidation
-      // revalidatePath("/dashboard");
-      return {
-        bookmarked: updated.isBookmarked,
-        message: updated.isBookmarked
+      return mutateSuccess(
+        updated.isBookmarked
           ? getMessage("bookmark", "ADD_SUCCESS")
           : getMessage("bookmark", "REMOVE_SUCCESS"),
-      };
+        { isBookmarked: updated.isBookmarked }
+      );
     } else {
       const created = await prisma.bookmark.create({
-        data: { userId, postId, isBookmarked: true },
+        data: { userId: user.id, postId, isBookmarked: true },
       });
-      return {
-        bookmarked: created.isBookmarked,
-        message: getMessage("bookmark", "ADD_SUCCESS"),
-      };
+      return mutateSuccess(getMessage("bookmark", "ADD_SUCCESS"), {
+        isBookmarked: created.isBookmarked,
+      });
     }
-  } catch (error) {
-    console.error("Toggle bookmark error:", error);
-    return { message: getMessage("bookmark", "REMOVE_ERROR") };
-  }
-};
+  });
+}
 
-export const getBookmarkedPosts = async () => {
-  try {
+type BookmarkWithAuthor = Prisma.BookmarkGetPayload<{
+  include: { post: true };
+}>;
+export async function getBookmarkedPosts(): Promise<
+  FetchResponse<BookmarkWithAuthor[]>
+> {
+  return handleFetchAction(async () => {
     const user = await getServerUser();
-    if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
+    if (!user) return fetchErrorNotLoggedIn;
     const bookmarkedPosts = await prisma.bookmark.findMany({
       where: { userId: user.id, isBookmarked: true },
       include: { post: true },
     });
-    return { data: bookmarkedPosts };
-  } catch (error) {
-    console.error("Toggle bookmark error:", error);
-    return { message: getMessage("bookmark", "REMOVE_ERROR") };
-  }
-};
-
-export const isPostBookmarked = async (postId: number) => {
-  const user = await getServerUser();
-  if (!user) return { message: getMessage("auth", "NOT_LOGGED_IN") };
-  const existing = await prisma.bookmark.findUnique({
-    where: { userId_postId: { userId: user.id, postId } },
+    return fetchSuccess(bookmarkedPosts);
   });
+}
 
-  return { bookmarked: existing?.isBookmarked ?? false };
+export const isPostBookmarked = async (
+  postId: number
+): Promise<FetchResponse<{ isBookmarked: boolean }>> => {
+  return handleFetchAction(async () => {
+    // return fetchErrorNotLoggedIn;
+    const user = await getServerUser();
+    if (!user) return fetchErrorNotLoggedIn;
+    const existing = await prisma.bookmark.findUnique({
+      where: { userId_postId: { userId: user.id, postId } },
+    });
+
+    return fetchSuccess({ isBookmarked: existing?.isBookmarked ?? false });
+  });
 };
+
+export async function revalidatePathAction(path: string) {
+  revalidatePath(path);
+}

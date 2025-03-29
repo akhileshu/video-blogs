@@ -1,4 +1,4 @@
-import { Info } from "@/components/app/info";
+import { renderStatusMessage } from "@/components/app/renderStatusMessage";
 import { getPostBySlug } from "@/features/post/actions/postActions";
 import CreateOrEditPostForm from "@/features/post/components/forms/createOrEdit";
 
@@ -8,9 +8,10 @@ export default async function Page({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const result = await getPostBySlug(slug);
-  const { data: post, message } = result || {};
-  if (message && !post) return <Info message={message} />;
+  const postResult = await getPostBySlug(slug);
+  const statusMessage = renderStatusMessage(postResult);
+  if (statusMessage || !postResult.ok) return statusMessage;
+  const { data: post, } = postResult;
 
   return <CreateOrEditPostForm post={post} />;
 }

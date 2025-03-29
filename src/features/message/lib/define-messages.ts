@@ -1,8 +1,10 @@
-type MessageType = "info" | "success" | "error" | "warning";
+export type ToastMessageType = "error" | "warning" | "success" | "info";
+type AdditionalMessageType = "validation" | "server" | "not_found" | "conflict";
+type MessageType = ToastMessageType | AdditionalMessageType;
 
 export type AppMessage = {
   type: MessageType;
-  text: string;                                                           
+  text: string;
 };
 
 export function defineMessages<T extends Record<string, AppMessage>>(
@@ -10,5 +12,3 @@ export function defineMessages<T extends Record<string, AppMessage>>(
 ) {
   return messages;
 }
-
-

@@ -2,21 +2,19 @@
 
 import MDEditor from "@uiw/react-md-editor";
 import { Dispatch, SetStateAction } from "react";
+import { CopyPostLinkButton } from "./copy-post-link-btn";
+import ToggleBookmarkForm from "./forms/BookmarkButton";
 import { TOC } from "./generateTOC";
-import ToggleBookmarkForm from "./components/forms/BookmarkButton";
-import { ShareButton } from "@/app/(with-layout)/dashboard/_components/my-bookmarks";
 
 export default function MdEditor({
   content,
   setContent,
   isEditing,
   postId,
-  isBookmarked,
 }: {
   content: string;
   postId?: number;
   isEditing?: boolean;
-  isBookmarked?: boolean;
   setContent?: Dispatch<SetStateAction<string>>;
 }) {
   return (
@@ -24,10 +22,8 @@ export default function MdEditor({
       <div className="min-w-60">
         <TOC className="p-4" content={content} />
         <div className="flex gap-2">
-          {!isEditing && postId && isBookmarked !== undefined ? (
-            <ToggleBookmarkForm isBookmarked={isBookmarked} postId={postId} />
-          ) : null}
-          <ShareButton slug={""}/>
+          {!isEditing && postId ? <ToggleBookmarkForm postId={postId} /> : null}
+          <CopyPostLinkButton slug={""} />
         </div>
       </div>
       {isEditing && setContent ? (
@@ -45,7 +41,7 @@ export default function MdEditor({
         <MDEditor.Markdown
           source={content}
           className="rounded-md p-3 pl-6"
-          style={{ whiteSpace: "pre-wrap"}}
+          style={{ whiteSpace: "pre-wrap" }}
         />
       )}
     </div>

@@ -7,6 +7,8 @@ type LinkButtonProps = LinkProps & {
   className?: string;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
+  disableUnderline?: boolean;
+  disableTransition?: boolean;
 };
 
 export function AppLink({
@@ -15,6 +17,8 @@ export function AppLink({
   className,
   leftIcon,
   rightIcon,
+  disableUnderline = false,
+  disableTransition = false,
   ...props
 }: LinkButtonProps) {
   return (
@@ -22,7 +26,9 @@ export function AppLink({
       href={href}
       className={cn(
         "rounded-md inline-flex items-center gap-2 text-blue-600 font-medium relative transition-colors hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
-        "after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full",
+        !disableUnderline &&
+          "after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-blue-500 after:transition-all after:duration-300 hover:after:w-full",
+        disableTransition && "after:transition-none",
         className
       )}
       {...props}

@@ -1,15 +1,16 @@
 "use client";
+import { FormEvent } from "react";
 import { LoaderCircle } from "lucide-react";
 import React, { ButtonHTMLAttributes } from "react";
-import { Button } from "./button";
+import { Button, ButtonState } from "./button";
 import { cn } from "@/lib/utils";
 
-type SubmitButtonProps= ButtonHTMLAttributes<HTMLButtonElement> & {
+type SubmitButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+  ButtonState & {
   text?: string;
   pendingText?: string;
   icon?: React.ReactNode;
   isPending: boolean;
-  disabled: boolean;
   className?: string;
 };
 
@@ -19,13 +20,11 @@ export default function SubmitButton({
   icon,
   isPending,
   className = "",
-  disabled,
   ...props
 }: SubmitButtonProps) {
   return (
     <Button
       {...props}
-      disabled={disabled}
       type="submit"
       className={cn("", className)}
     >
@@ -44,3 +43,11 @@ export default function SubmitButton({
   );
 }
 
+
+export function confirmBeforeSubmit(message: string) {
+  return (e: FormEvent<HTMLFormElement>) => {
+    if (!confirm(message)) {
+      e.preventDefault();
+    }
+  };
+}

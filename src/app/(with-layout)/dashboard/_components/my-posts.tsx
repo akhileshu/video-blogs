@@ -1,6 +1,6 @@
 import { AppCard } from "@/components/app/card";
-import { Info } from "@/components/app/info";
 import { AppLink } from "@/components/app/link";
+import { renderStatusMessage } from "@/components/app/renderStatusMessage";
 import {
   Table,
   TableBody,
@@ -9,19 +9,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getMessage } from "@/features/message/lib/get-message";
 import { getLoggedInUsersPosts } from "@/features/post/actions/postActions";
 import DeletePostForm from "@/features/post/components/forms/DeletePostButton";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 
 export async function MyPosts({ className }: { className?: string }) {
-  const { data: posts, message } = await getLoggedInUsersPosts();
-  if (message?.type === "warning") return <Info message={message} />;
-  else if (!posts || posts.length === 0)
-    return <Info message={getMessage("post", "NO_OWN_POSTS")} />;
+  const postsResult = await getLoggedInUsersPosts();
+ const cardTitle = "My Posts";
+  const statusMessage = renderStatusMessage(postsResult,cardTitle);
+  if (statusMessage || !postsResult.ok) return statusMessage;
+  const { data:posts } = postsResult
 
   return (
-    <AppCard title="My Posts" className={cn("border-0", className)}>
+    <AppCard title={cardTitle} className={cn("", className)}>
       <Table>
         <TableHeader>
           <TableRow>
@@ -34,22 +34,13 @@ export async function MyPosts({ className }: { className?: string }) {
           {posts.map((post) => (
             <TableRow key={post.id}>
               <TableCell className="font-medium">
-                <AppLink
-                  className="after:transition-none"
-                  href={`/posts/${post.slug}`}
-                >
+                <AppLink disableTransition href={`/posts/${post.slug}`}>
                   {post.title}
                 </AppLink>
               </TableCell>
-              <TableCell>
-                {new Date(post.createdAt).toLocaleDateString()}
-              </TableCell>
+              <TableCell>{formatDate(post.createdAt)}</TableCell>
               <TableCell className="text-right flex gap-3 justify-end">
-                <AppLink
-                  href={`/posts/${post.slug}/edit`}
-                >
-                  Edit
-                </AppLink>
+                <AppLink href={`/posts/${post.slug}/edit`}>Edit</AppLink>
                 <DeletePostForm postId={post.id} />
               </TableCell>
             </TableRow>

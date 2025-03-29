@@ -2,26 +2,15 @@
 
 import Auth from "@/features/auth/components";
 
-import { useRouter } from "next/navigation";
-import { Search } from "../posts/_components/search";
-import { getInternalHref } from "@/lib/getInternalHref";
 import { AppLink } from "@/components/app/link";
+import { getInternalHref } from "@/lib/getInternalHref";
+import { Search } from "../../../features/post/components/search";
 
 export default function Navbar() {
-  const router = useRouter();
   return (
     <nav className="w-full p-1 flex justify-between items-center border-b">
-      <h1
-        onClick={() => router.push("/")}
-        className="text-xl cursor-pointer font-bold"
-      >
-        MyApp
-      </h1>
-      <AppLink
-        href={getInternalHref("post", "create")}
-      >
-        Create Post
-      </AppLink>
+      <AppLink className="font-bold text-lg" href={"/"}>MyApp</AppLink>
+      <AppLink href={getInternalHref("post", "create")}>Create Post</AppLink>
       <Search />
       <Auth />
     </nav>

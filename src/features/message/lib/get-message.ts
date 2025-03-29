@@ -8,3 +8,4 @@ export function getMessage<
 >(category: C, key: K) {
   return appMessages[category][key];
 }
+
