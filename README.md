@@ -1,3 +1,89 @@
+# **video-blogs** 🧑‍💻📚 | Video + Structured Learning
+
+A platform that **combines videos with structured content** for seamless learning. Perfect for software engineers and content creators who want **structured learning paths** with integrated notes and discussions.
+
+---
+
+## 🚀 **Current Features (MVP Progress)**
+
+✅ **Authentication** (NextAuth.js)  
+✅ **Post Creation & Editing** (Markdown Editor)  
+✅ **Bookmark Posts** for easy access  
+✅ **CRUD Operations for Posts**  
+❌ **Video Integration (Coming Soon)**
+
+---
+
+## 🎯 **Core Idea**
+
+Software engineers often struggle with fragmented learning—videos lack structured notes, and blogs don’t always match video content. This platform **bridges the gap** by allowing:
+
+- **Creators** to upload videos & structured notes side by side
+- **Learners** to watch, read, and engage in a single place
+
+---
+
+## 📌 **Key Features (Planned Scope)**
+
+### **For Creators**
+
+✔ Upload videos (YouTube link or self-hosted)  
+✔ Add structured notes/blogs linked to videos  
+✔ Markdown or WYSIWYG editor for notes  
+✔ AI-powered note generation (future feature)
+
+### **For Learners**
+
+✔ Watch video + read structured content side by side  
+✔ Bookmark sections for quick access  
+✔ Search topics easily (e.g., "React Hooks")  
+✔ Light/Dark mode for a better reading experience
+
+### **Community Features**
+
+✔ Comments/Q&A under each post  
+✔ Like/save content for later reference  
+✔ Track learning progress (future feature)
+
+---
+
+## 🛠 **Tech Stack**
+
+| Area                 | Tech Used                   |
+| -------------------- | --------------------------- |
+| **Frontend**         | Next.js, Tailwind CSS       |
+| **Backend**          | Node.js, Prisma             |
+| **Database**         | PostgreSQL                  |
+| **Auth**             | NextAuth.js                 |
+| **Storage (Videos)** | YouTube API / Cloud Storage |
+| **Editor**           | MDX / @uiw/react-md-editor  |
+
+---
+
+## 📌 **How It Works (User Flow)**
+
+1️⃣ **Creators publish structured posts** (Markdown editor + future video support)  
+2️⃣ **Users browse posts** → Read & bookmark their favorites  
+3️⃣ **Users interact** (comment, like, save for later)  
+4️⃣ **Future Features**: Video integration, AI-generated summaries
+
+---
+
+## 🚧 **Development Progress**
+
+- ✅ **Auth system with NextAuth.js**
+- ✅ **Post CRUD with Markdown support**
+- ✅ **Bookmarking system for saved posts**
+- ⏳ **Next Up**: Video integration & improved UI
+
+---
+
+## 📢 **Contributing**
+
+Want to help? Open a PR or suggest a feature! 🚀
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -15,22 +101,3 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
