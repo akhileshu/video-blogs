@@ -1,4 +1,4 @@
-const RATE_LIMIT = 10; // Max requests per minute
+const RATE_LIMIT = 30; // Max requests per minute
 const EXPIRY_TIME = 60 * 1000; // 1 minute
 const requestMap = new Map<string, { count: number; timestamp: number }>();
 
