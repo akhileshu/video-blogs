@@ -27,7 +27,7 @@ export default async function Page({
         )}
       </div>
 
-      <MdEditor postId={post.id} content={post.content} />
+      <MdEditor postSlug={post.slug} postId={post.id} content={post.content} />
     </AppCard>
   );
 }

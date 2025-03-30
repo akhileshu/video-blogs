@@ -11,9 +11,11 @@ export default function MdEditor({
   setContent,
   isEditing,
   postId,
+  postSlug,
 }: {
   content: string;
   postId?: number;
+  postSlug?: string;
   isEditing?: boolean;
   setContent?: Dispatch<SetStateAction<string>>;
 }) {
@@ -22,8 +24,12 @@ export default function MdEditor({
       <div className="min-w-60">
         <TOC className="p-4" content={content} />
         <div className="flex gap-2">
-          {!isEditing && postId ? <ToggleBookmarkForm postId={postId} /> : null}
-          <CopyPostLinkButton slug={""} />
+          {!isEditing && postId ? (
+            <>
+              <ToggleBookmarkForm postId={postId} />{" "}
+              <CopyPostLinkButton slug={postSlug ?? ""} />
+            </>
+          ) : null}
         </div>
       </div>
       {isEditing && setContent ? (
