@@ -25,6 +25,7 @@ import {
   parseFormData,
 } from "../../../lib/handleAction";
 import { Post, Prisma } from "@prisma/client";
+import { APP_SETTINGS } from "@/lib/utils";
 
 type PostWithAuthor = Prisma.PostGetPayload<{
   include: { author: true };
@@ -85,6 +86,21 @@ export async function createPost(
   return handleMutateAction(async () => {
     const user = await getServerUser();
     if (!user) return mutateErrorNotLoggedIn;
+
+    if (APP_SETTINGS.isProd) {
+      const userData = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { totalPostsCreated: true },
+      });
+
+      if (
+        userData &&
+        userData.totalPostsCreated >= APP_SETTINGS.limits.POSTS_CREATE
+      ) {
+        return mutateError(getMessage("post", "CREATE_LIMIT_REACHED"));
+      }
+    }
+
     const { data, fieldErrors } = parseFormData(formData, postCreateSchema);
     if (fieldErrors)
       return mutateError(getMessage("post", "CREATE_ERROR"), fieldErrors);
@@ -96,6 +112,14 @@ export async function createPost(
         authorId: user.id,
       },
     });
+
+    if (APP_SETTINGS.isProd) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { totalPostsCreated: { increment: 1 } },
+      });
+    }
+
     return mutateSuccess(getMessage("post", "CREATE_SUCCESS"));
   });
 }
@@ -107,6 +131,21 @@ export async function updatePost(
   return handleMutateAction(async () => {
     const user = await getServerUser();
     if (!user) return mutateErrorNotLoggedIn;
+
+    if (APP_SETTINGS.isProd) {
+      const userData = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { totalPostsUpdated: true },
+      });
+
+      if (
+        userData &&
+        userData.totalPostsUpdated >= APP_SETTINGS.limits.POSTS_UPDATE
+      ) {
+        return mutateError(getMessage("post", "UPDATE_LIMIT_REACHED"));
+      }
+    }
+
     const { data, fieldErrors } = parseFormData(formData, postUpdateSchema);
     if (fieldErrors)
       return mutateError(getMessage("post", "UPDATE_ERROR"), fieldErrors);
@@ -118,6 +157,12 @@ export async function updatePost(
         slug: generateSlug(data.title),
       },
     });
+    if (APP_SETTINGS.isProd) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { totalPostsUpdated: { increment: 1 } },
+      });
+    }
     return mutateSuccess(getMessage("post", "UPDATE_SUCCESS"));
   });
 }
@@ -151,6 +196,30 @@ export async function toggleBookmark(
   return handleMutateAction(async () => {
     const user = await getServerUser();
     if (!user) return mutateErrorNotLoggedIn;
+
+    const incrementBookmarkCountInProd = async () => {
+      if (APP_SETTINGS.isProd) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { totalBookmarksAdded: { increment: 1 } },
+        });
+      }
+    };
+
+    if (APP_SETTINGS.isProd) {
+      const userData = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { totalBookmarksAdded: true },
+      });
+
+      if (
+        userData &&
+        userData.totalBookmarksAdded >= APP_SETTINGS.limits.MAX_BOOKMARKS
+      ) {
+        return mutateError(getMessage("bookmark", "BOOKMARK_LIMIT"));
+      }
+    }
+
     const { data, fieldErrors } = parseFormData(formData, toggleBookmarkSchema);
     if (fieldErrors)
       return mutateError(getMessage("bookmark", "REMOVE_ERROR"), fieldErrors);
@@ -163,6 +232,7 @@ export async function toggleBookmark(
         where: { id: existing.id },
         data: { isBookmarked: !existing.isBookmarked },
       });
+      incrementBookmarkCountInProd()
       return mutateSuccess(
         updated.isBookmarked
           ? getMessage("bookmark", "ADD_SUCCESS")
@@ -173,6 +243,7 @@ export async function toggleBookmark(
       const created = await prisma.bookmark.create({
         data: { userId: user.id, postId, isBookmarked: true },
       });
+      incrementBookmarkCountInProd();
       return mutateSuccess(getMessage("bookmark", "ADD_SUCCESS"), {
         isBookmarked: created.isBookmarked,
       });

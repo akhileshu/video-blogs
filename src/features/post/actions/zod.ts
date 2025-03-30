@@ -7,8 +7,8 @@ export const postCreateSchema = z.object({
 
 export const postUpdateSchema = z.object({
   id: z.coerce.number(),
-  title: z.string().min(3, "Title too short"),
-  content: z.string().min(10, "Content too short"),
+  title: z.string().min(3, "Title too short").max(100),
+  content: z.string().min(10, "Content too short").max(5000),
 });
 
 export const postDeleteSchema = z.object({

@@ -53,15 +53,18 @@ model VerificationToken {
 }
 
 model User {
-  id            String     @id @default(cuid())
-  name          String?
-  email         String?    @unique
-  emailVerified DateTime?  @map("email_verified")
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  posts         Post[]
-  Bookmark      Bookmark[]
+  id                  String     @id @default(cuid())
+  name                String?
+  email               String?    @unique
+  emailVerified       DateTime?  @map("email_verified")
+  image               String?
+  accounts            Account[]
+  sessions            Session[]
+  posts               Post[]
+  Bookmark            Bookmark[]
+  totalPostsCreated   Int        @default(0) // Tracks all-time created posts
+  totalPostsUpdated   Int        @default(0) // Tracks all-time updated posts
+  totalBookmarksAdded Int        @default(0) // Tracks total bookmarks created over time
 
   @@map("users")
 }

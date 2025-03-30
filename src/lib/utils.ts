@@ -10,9 +10,17 @@ export const previewText = (content: string, length = 100) =>
 
 export const formatDate = (date: Date) => new Date(date).toLocaleDateString();
 
+export function isMobileUserAgent(userAgent: string | null): boolean {
+  if (!userAgent) return false;
+  return /mobile|android|iphone|ipad/i.test(userAgent);
+}
 
 
-
-
-
-
+export const APP_SETTINGS = {
+  isProd: process.env.NODE_ENV === "production",
+  limits: {
+    POSTS_CREATE: 10,
+    POSTS_UPDATE: 50,
+    MAX_BOOKMARKS: 50,
+  },
+};
