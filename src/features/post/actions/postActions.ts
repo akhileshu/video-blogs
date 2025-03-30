@@ -2,7 +2,22 @@
 import { getServerUser } from "@/features/auth/lib";
 import { prisma } from "@/features/db/prisma";
 import { getMessage } from "@/features/message/lib/get-message";
+import { Post, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import {
+  FetchResponse,
+  MutateResponse,
+  fetchError,
+  fetchErrorNotLoggedIn,
+  fetchSuccess,
+  handleFetchAction,
+  handleMutateAction,
+  mutateError,
+  mutateErrorNotLoggedIn,
+  mutateSuccess,
+  parseFormData,
+} from "../../../lib/handleAction";
+import { checkLimit, incrementLimit } from "../../../lib/limitHandler";
 import {
   postCreateSchema,
   postDeleteSchema,
@@ -11,21 +26,6 @@ import {
   toggleBookmarkSchema,
 } from "./zod";
 import { generateSlug } from "./lib";
-import {
-  fetchSuccess,
-  fetchError,
-  handleFetchAction,
-  mutateSuccess,
-  mutateError,
-  handleMutateAction,
-  FetchResponse,
-  MutateResponse,
-  fetchErrorNotLoggedIn,
-  mutateErrorNotLoggedIn,
-  parseFormData,
-} from "../../../lib/handleAction";
-import { Post, Prisma } from "@prisma/client";
-import { APP_SETTINGS } from "@/lib/utils";
 
 type PostWithAuthor = Prisma.PostGetPayload<{
   include: { author: true };
@@ -87,19 +87,12 @@ export async function createPost(
     const user = await getServerUser();
     if (!user) return mutateErrorNotLoggedIn;
 
-    if (APP_SETTINGS.isProd) {
-      const userData = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { totalPostsCreated: true },
-      });
-
-      if (
-        userData &&
-        userData.totalPostsCreated >= APP_SETTINGS.limits.POSTS_CREATE
-      ) {
-        return mutateError(getMessage("post", "CREATE_LIMIT_REACHED"));
-      }
-    }
+    const limitEror = await checkLimit(
+      user.id,
+      "totalPostsCreated",
+      getMessage("post", "CREATE_LIMIT_REACHED")
+    );
+    if (limitEror) return limitEror;
 
     const { data, fieldErrors } = parseFormData(formData, postCreateSchema);
     if (fieldErrors)
@@ -113,13 +106,7 @@ export async function createPost(
       },
     });
 
-    if (APP_SETTINGS.isProd) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { totalPostsCreated: { increment: 1 } },
-      });
-    }
-
+    await incrementLimit(user.id, "totalPostsCreated");
     return mutateSuccess(getMessage("post", "CREATE_SUCCESS"));
   });
 }
@@ -131,20 +118,12 @@ export async function updatePost(
   return handleMutateAction(async () => {
     const user = await getServerUser();
     if (!user) return mutateErrorNotLoggedIn;
-
-    if (APP_SETTINGS.isProd) {
-      const userData = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { totalPostsUpdated: true },
-      });
-
-      if (
-        userData &&
-        userData.totalPostsUpdated >= APP_SETTINGS.limits.POSTS_UPDATE
-      ) {
-        return mutateError(getMessage("post", "UPDATE_LIMIT_REACHED"));
-      }
-    }
+    const limitEror = await checkLimit(
+      user.id,
+      "totalPostsUpdated",
+      getMessage("post", "UPDATE_LIMIT_REACHED")
+    );
+    if (limitEror) return limitEror;
 
     const { data, fieldErrors } = parseFormData(formData, postUpdateSchema);
     if (fieldErrors)
@@ -157,12 +136,7 @@ export async function updatePost(
         slug: generateSlug(data.title),
       },
     });
-    if (APP_SETTINGS.isProd) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { totalPostsUpdated: { increment: 1 } },
-      });
-    }
+    await incrementLimit(user.id, "totalPostsUpdated");
     return mutateSuccess(getMessage("post", "UPDATE_SUCCESS"));
   });
 }
@@ -198,27 +172,15 @@ export async function toggleBookmark(
     if (!user) return mutateErrorNotLoggedIn;
 
     const incrementBookmarkCountInProd = async () => {
-      if (APP_SETTINGS.isProd) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { totalBookmarksAdded: { increment: 1 } },
-        });
-      }
+      await incrementLimit(user.id, "totalBookmarksAdded");
     };
 
-    if (APP_SETTINGS.isProd) {
-      const userData = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { totalBookmarksAdded: true },
-      });
-
-      if (
-        userData &&
-        userData.totalBookmarksAdded >= APP_SETTINGS.limits.MAX_BOOKMARKS
-      ) {
-        return mutateError(getMessage("bookmark", "BOOKMARK_LIMIT"));
-      }
-    }
+    const limitEror = await checkLimit(
+      user.id,
+      "totalBookmarksAdded",
+      getMessage("bookmark", "BOOKMARK_LIMIT")
+    );
+    if (limitEror) return limitEror;
 
     const { data, fieldErrors } = parseFormData(formData, toggleBookmarkSchema);
     if (fieldErrors)
@@ -232,7 +194,7 @@ export async function toggleBookmark(
         where: { id: existing.id },
         data: { isBookmarked: !existing.isBookmarked },
       });
-      incrementBookmarkCountInProd()
+      await incrementBookmarkCountInProd();
       return mutateSuccess(
         updated.isBookmarked
           ? getMessage("bookmark", "ADD_SUCCESS")
@@ -243,7 +205,7 @@ export async function toggleBookmark(
       const created = await prisma.bookmark.create({
         data: { userId: user.id, postId, isBookmarked: true },
       });
-      incrementBookmarkCountInProd();
+      await incrementBookmarkCountInProd();
       return mutateSuccess(getMessage("bookmark", "ADD_SUCCESS"), {
         isBookmarked: created.isBookmarked,
       });

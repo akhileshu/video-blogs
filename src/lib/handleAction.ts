@@ -3,6 +3,7 @@ import { AppMessage } from "@/features/message/lib/define-messages";
 import { getMessage } from "@/features/message/lib/get-message";
 import { Prisma } from "@prisma/client";
 import { z, ZodSchema } from "zod";
+import { getErrorMessage } from "./utils";
 
 // we will follow - Using null Instead of a Conditional Property
 
@@ -46,8 +47,8 @@ export async function handleFetchAction<T>(
 ): Promise<FetchResponse<T>> {
   try {
     return await fn();
-  } catch (error: any) {
-    console.log(error.message);
+  } catch (error) {
+    console.log(getErrorMessage(error));
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       switch (error.code) {
@@ -128,8 +129,8 @@ export async function handleMutateAction<T, S extends z.ZodType<any>>(
 ): Promise<MutateResponse<T, S>> {
   try {
     return await fn();
-  } catch (error: any) {
-    console.log(error.message);
+  } catch (error) {
+    console.log(getErrorMessage(error));
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       // Handle known Prisma errors
       switch (error.code) {
@@ -168,7 +169,6 @@ export async function handleMutateAction<T, S extends z.ZodType<any>>(
     return mutateError<S>({ type: "error", text: fallbackErrorMessage });
   }
 }
-
 
 const getFormValues = (formData: FormData) =>
   Object.fromEntries(formData.entries());

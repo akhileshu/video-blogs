@@ -6,5 +6,3 @@ export const generateSlug = (title: string) =>
     .replace(/[^a-z0-9\s-]/g, "") // remove special chars
     .trim()
     .replace(/\s+/g, "-"); // replace spaces with hyphen
-
-
