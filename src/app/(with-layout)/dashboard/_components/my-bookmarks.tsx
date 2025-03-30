@@ -16,9 +16,9 @@ export default function MyBookmarks({
   bookmarkedPostsResult,
   className,
 }: MyBookmarksProps) {
-  const cardTitle="My Bookmarks"
+  const cardTitle = "My Bookmarks";
 
-  const statusMessage = renderStatusMessage(bookmarkedPostsResult,cardTitle);
+  const statusMessage = renderStatusMessage(bookmarkedPostsResult, cardTitle);
   if (statusMessage || !bookmarkedPostsResult.ok) return statusMessage;
 
   const { data } = bookmarkedPostsResult;

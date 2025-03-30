@@ -9,7 +9,7 @@ export default async function Page({
 }) {
   const { slug } = await params;
   const postResult = await getPostBySlug(slug);
-  const statusMessage = renderStatusMessage(postResult);
+  const statusMessage = renderStatusMessage(postResult,"Post Editor");
   if (statusMessage || !postResult.ok) return statusMessage;
   const { data: post, } = postResult;
 
