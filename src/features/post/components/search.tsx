@@ -11,7 +11,7 @@ export function Search({ className }: { className?: string }) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (query.trim())
-      router.push(`posts?query=${encodeURIComponent(query.trim())}`);
+      router.push(`/posts?query=${encodeURIComponent(query.trim())}`);
   };
 
   return (
