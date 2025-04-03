@@ -24,7 +24,7 @@ export default function Auth() {
           <LogoutButton />
         </div>
       ) : (
-        <Button onClick={() => signIn("google")}>Sign In with Google</Button>
+        <Button disabled={false} onClick={() => signIn("google")}>Sign In with Google</Button>
       )}
     </div>
   );
@@ -38,5 +38,9 @@ function LogoutButton() {
     router.refresh(); // Clear client-side cache and re-render
   }
 
-  return <Button onClick={handleSignOut}>Sign Out</Button>;
+  return (
+    <Button disabled={false} onClick={handleSignOut}>
+      Sign Out
+    </Button>
+  );
 }

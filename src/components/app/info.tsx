@@ -4,7 +4,7 @@ import { InfoIcon } from "lucide-react";
 import { AppCard } from "./card";
 import { ReactNode } from "react";
 
-export function Info({
+export function StatusMessage({
   className,
   message,
   cardTitle,

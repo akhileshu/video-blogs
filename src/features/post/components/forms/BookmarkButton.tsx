@@ -5,7 +5,8 @@ import { FaBookmark, FaRegBookmark } from "react-icons/fa";
 import { isPostBookmarked, toggleBookmark } from "../../actions/postActions";
 import { useHandleFormState } from "@/lib/useHandleFormState";
 import { initialState } from "@/lib/handleAction";
-import { handleToastMessage } from "@/components/app/toast";
+import { handleToastMessage } from "@/lib/tost/toast-utils";
+import AppForm from "@/components/app/form";
 
 export default function ToggleBookmarkForm({ postId }: { postId: number }) {
   const [toggleBookmarkState, formAction, isPending] = useActionState(
@@ -22,7 +23,7 @@ export default function ToggleBookmarkForm({ postId }: { postId: number }) {
   const isBookmarked = !isToggleClicked
     ? isPostBookmarkedResult?.data?.isBookmarked
     : toggleBookmarkState?.data?.isBookmarked;
-    
+
   const getButtonState = (): ButtonState => {
     const { data, message, ok } = isPostBookmarkedResult;
 
@@ -69,7 +70,7 @@ export default function ToggleBookmarkForm({ postId }: { postId: number }) {
   }, [postId]);
 
   return (
-    <form action={formAction}>
+    <AppForm submitVariant="custom" action={formAction} className="space-y-4">
       <input type="hidden" name="postId" value={postId} />
       <Button {...getButtonState()} type="submit">
         {isBookmarked ? (
@@ -78,6 +79,6 @@ export default function ToggleBookmarkForm({ postId }: { postId: number }) {
           <FaRegBookmark />
         )}
       </Button>
-    </form>
+    </AppForm>
   );
 }

@@ -1,9 +1,8 @@
 "use client";
-import { FormEvent } from "react";
+import { cn } from "@/lib/utils";
 import { LoaderCircle } from "lucide-react";
 import React, { ButtonHTMLAttributes } from "react";
 import { Button, ButtonState } from "./button";
-import { cn } from "@/lib/utils";
 
 type SubmitButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
   ButtonState & {
@@ -44,10 +43,3 @@ export default function SubmitButton({
 }
 
 
-export function confirmBeforeSubmit(message: string) {
-  return (e: FormEvent<HTMLFormElement>) => {
-    if (!confirm(message)) {
-      e.preventDefault();
-    }
-  };
-}

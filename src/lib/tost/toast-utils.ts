@@ -1,18 +1,7 @@
 "use client";
 import { commonMessages } from "@/features/message/common";
 import { AppMessage, ToastMessageType } from "@/features/message/lib/define-messages";
-import { toast, Toaster } from "sonner";
-
-export const ToasterProvider = () => {
-  return (
-    <Toaster
-      toastOptions={{
-        duration: 10000, // Adjust duration (10 seconds by default)
-      }}
-      richColors
-    />
-  );
-};
+import { toast } from "sonner";
 
 
 const isToastMessageType = (type: string): type is ToastMessageType => {

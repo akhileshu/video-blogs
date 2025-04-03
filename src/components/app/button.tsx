@@ -9,7 +9,7 @@ import {
 
 export type ButtonState = {
   tooltip?: string;
-  disabled?: boolean;
+  disabled: boolean;
 };
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &

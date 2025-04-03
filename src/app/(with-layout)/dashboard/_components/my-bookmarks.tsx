@@ -1,7 +1,7 @@
 "use client";
 import { AppCard } from "@/components/app/card";
 import { AppLink } from "@/components/app/link";
-import { renderStatusMessage } from "@/components/app/renderStatusMessage";
+import { renderStatusMessage } from "@/lib/renderStatusMessage";
 import { getBookmarkedPosts } from "@/features/post/actions/postActions";
 import ToggleBookmarkForm from "@/features/post/components/forms/BookmarkButton";
 import { cn, previewText } from "@/lib/utils";

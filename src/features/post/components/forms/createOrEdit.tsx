@@ -12,6 +12,7 @@ import MdEditor from "@/features/post/components/md-editor";
 import { useHandleFormState } from "@/lib/useHandleFormState";
 import { Post } from "@prisma/client";
 import { initialState } from "@/lib/handleAction";
+import AppForm from "@/components/app/form";
 
 interface CreateOrEditProps {
   post?: Post;
@@ -48,7 +49,11 @@ export default function CreateOrEditPostForm({ post }: CreateOrEditProps) {
   };
 
   return (
-    <form action={formAction} className="space-y-4">
+    <AppForm
+      submitVariant="custom"
+      action={formAction}
+      className="space-y-4"
+    >
       <input type="hidden" name="id" value={post?.id ?? ""} />
       <div className="flex gap-2 mt-2">
         <Input
@@ -60,7 +65,6 @@ export default function CreateOrEditPostForm({ post }: CreateOrEditProps) {
           placeholder="Enter post title"
         />
         <FieldError errors={fieldErrors?.title} />
-
         <input type="hidden" name="content" value={content} />
         <SubmitButton
           {...getButtonState()}
@@ -71,11 +75,10 @@ export default function CreateOrEditPostForm({ post }: CreateOrEditProps) {
           className="self-start"
         />
       </div>
-
       <div>
         <MdEditor isEditing setContent={setContent} content={content} />
         <FieldError errors={fieldErrors?.content} />
       </div>
-    </form>
+    </AppForm>
   );
 }

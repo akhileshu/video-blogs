@@ -1,6 +1,6 @@
 import { AppCard } from "@/components/app/card";
 import { AppLink } from "@/components/app/link";
-import { renderStatusMessage } from "@/components/app/renderStatusMessage";
+import { renderStatusMessage } from "@/lib/renderStatusMessage";
 import { getPosts } from "@/features/post/actions/postActions";
 import { formatDate, previewText } from "@/lib/utils";
 

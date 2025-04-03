@@ -1,6 +1,6 @@
 import { AppCard } from "@/components/app/card";
 import { AppLink } from "@/components/app/link";
-import { renderStatusMessage } from "@/components/app/renderStatusMessage";
+import { renderStatusMessage } from "@/lib/renderStatusMessage";
 import {
   Table,
   TableBody,
@@ -15,10 +15,10 @@ import { cn, formatDate } from "@/lib/utils";
 
 export async function MyPosts({ className }: { className?: string }) {
   const postsResult = await getLoggedInUsersPosts();
- const cardTitle = "My Posts";
-  const statusMessage = renderStatusMessage(postsResult,cardTitle);
+  const cardTitle = "My Posts";
+  const statusMessage = renderStatusMessage(postsResult, cardTitle);
   if (statusMessage || !postsResult.ok) return statusMessage;
-  const { data:posts } = postsResult
+  const { data: posts } = postsResult;
 
   return (
     <AppCard title={cardTitle} className={cn("", className)}>

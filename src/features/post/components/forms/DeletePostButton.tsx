@@ -1,18 +1,14 @@
 "use client";
-import { Button } from "@/components/app/button";
+import AppForm from "@/components/app/form";
+import { initialState } from "@/lib/handleAction";
 import { useHandleFormState } from "@/lib/useHandleFormState";
 import { useActionState } from "react";
 import { deletePost } from "../../actions/postActions";
-import { confirmBeforeSubmit } from "@/components/app/SubmitButton";
-import { initialState } from "@/lib/handleAction";
 
 export default function DeletePostForm({ postId }: { postId: number }) {
   const [state, formAction, isPending] = useActionState(
     deletePost,
     initialState
-  );
-  const handleConfirm = confirmBeforeSubmit(
-    "Are you sure you want to delete this post?"
   );
 
   useHandleFormState({
@@ -21,11 +17,21 @@ export default function DeletePostForm({ postId }: { postId: number }) {
   });
 
   return (
-    <form onSubmit={handleConfirm} action={formAction}>
+    <AppForm
+      action={formAction}
+      variant="delete"
+      confirmation={{
+        message: "Are you sure you want to delete this?",
+        enabled: true,
+      }}
+      submitVariant="default"
+      submitProps={{
+        isPending: isPending,
+        buttonState: { disabled: isPending },
+        label: "Delete",
+      }}
+    >
       <input type="hidden" name="id" value={postId} />
-      <Button type="submit" disabled={isPending} className="text-red-500">
-        Delete
-      </Button>
-    </form>
+    </AppForm>
   );
 }

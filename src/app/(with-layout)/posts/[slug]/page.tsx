@@ -1,5 +1,5 @@
 import { AppCard } from "@/components/app/card";
-import { renderStatusMessage } from "@/components/app/renderStatusMessage";
+import { renderStatusMessage } from "@/lib/renderStatusMessage";
 import { getPostBySlug } from "@/features/post/actions/postActions";
 import MdEditor from "@/features/post/components/md-editor";
 import { formatDate } from "@/lib/utils";

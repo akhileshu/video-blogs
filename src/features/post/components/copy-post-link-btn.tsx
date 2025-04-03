@@ -8,5 +8,9 @@ export function CopyPostLinkButton({ slug }: { slug: string }) {
     toast.success("Post link copied to clipboard!");
   };
 
-  return <Button onClick={handleShare}>Share</Button>;
+  return (
+    <Button disabled={false} onClick={handleShare}>
+      Share
+    </Button>
+  );
 }
